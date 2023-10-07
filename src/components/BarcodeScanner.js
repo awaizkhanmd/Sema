@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import QrBarcodeScanner from 'react-qr-barcode-scanner';
+import './BarcodeScanner.css'; // Import your CSS file
 
 const BarcodeScanner = () => {
   const [scannedData, setScannedData] = useState('');
   const [isCameraAccessible, setIsCameraAccessible] = useState(false);
-  const [cameraStream, setCameraStream] = useState(null);
   const [barcodeDetected, setBarcodeDetected] = useState(false);
+  const videoRef = useRef(null);
 
   const handleScan = (data) => {
     if (data) {
@@ -34,34 +35,24 @@ const BarcodeScanner = () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       setIsCameraAccessible(true);
-      setCameraStream(stream); // Store the camera stream in state
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+      }
     } catch (error) {
       console.error('Camera access error:', error);
     }
   };
 
   return (
-    <div>
-      <h2>QR Code and Barcode Scanner</h2>
-      {isCameraAccessible ? (
-        <div className="scanner-container">
-          {/* Display the camera feed in a video element */}
-          <video
-            ref={(video) => {
-              if (video && cameraStream) {
-                video.srcObject = cameraStream;
-                video.play();
-              }
-            }}
-          ></video>
-          <QrBarcodeScanner onScan={handleScan} />
-        </div>
-      ) : (
-        <div>
-          <p>Camera access is required to scan QR codes and barcodes.</p>
-          <button onClick={requestCameraAccess}>Request Camera Access</button>
-        </div>
-      )}
+    <div className="page-container">
+      <div className="scanner-container">
+        <div className={`scan-line ${barcodeDetected ? 'scanning' : ''}`} />
+        {/* Display the camera feed in a video element */}
+        <video ref={videoRef} playsInline autoPlay muted />
+        <QrBarcodeScanner onScan={handleScan} />
+      </div>
       <div className="result-container">
         {barcodeDetected && (
           <div>

@@ -1,0 +1,53 @@
+/* BarcodeScanner.css */
+
+/* Root container for the entire page */
+.page-container {
+    background-color: black; /* Set background color to black */
+    color: white; /* Set text color to white for better readability on a black background */
+    min-height: 100vh; /* Ensure the container takes at least the full viewport height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* Container for the scanner area */
+  .scanner-container {
+    position: relative;
+    width: 100%; /* Make the container fill the available width */
+    max-width: 400px; /* Set a maximum width for the scanner area */
+  }
+  
+  /* Scanning animation for the scan line */
+  .scan-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #00ff00; /* Green color for the scan line */
+    opacity: 0.7;
+    transform-origin: 50%;
+    transform: scaleX(0);
+    transition: transform 1s linear;
+  }
+  
+  .scan-line.scanning {
+    transform: scaleX(1);
+  }
+  
+  /* Video element for camera feed */
+  video {
+    width: 100%;
+    height: auto; /* Maintain the aspect ratio */
+    max-height: 400px; /* Set a maximum height for the video element */
+  }
+  
+  /* Result container */
+  .result-container {
+    margin-top: 20px;
+    text-align: center;
+  }
+  
+  /* Your other styles can be added below */
+  

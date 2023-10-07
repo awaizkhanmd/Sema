@@ -6,6 +6,7 @@ const BarcodeScanner = () => {
   const [scannedData, setScannedData] = useState('');
   const [isCameraAccessible, setIsCameraAccessible] = useState(false);
   const [barcodeDetected, setBarcodeDetected] = useState(false);
+  const [cameraRequested, setCameraRequested] = useState(false); // New state to track camera request
   const videoRef = useRef(null);
   const streamRef = useRef(null); // Store the camera stream reference
 
@@ -23,12 +24,16 @@ const BarcodeScanner = () => {
         navigator.userAgent
       );
 
-    if (isMobileDevice) {
-      // Mobile device detected, request the back camera
-      requestCameraAccess({ facingMode: 'environment' });
-    } else {
-      // Desktop or non-mobile device, check for external scanner or ask for camera access
-      checkForExternalScanner();
+    if (!cameraRequested) {
+      if (isMobileDevice) {
+        // Mobile device detected, request the back camera
+        requestCameraAccess({ facingMode: 'environment' });
+      } else {
+        // Desktop or non-mobile device, check for external scanner or ask for camera access
+        checkForExternalScanner();
+      }
+      // Set the cameraRequested flag to true to avoid repeated requests
+      setCameraRequested(true);
     }
 
     // Cleanup function to stop the camera stream when unmounting
@@ -39,7 +44,7 @@ const BarcodeScanner = () => {
         });
       }
     };
-  }, []);
+  }, [cameraRequested]);
 
   useEffect(() => {
     // Reset barcode detection after 10 seconds
@@ -71,6 +76,11 @@ const BarcodeScanner = () => {
 
       // Store the camera stream reference
       streamRef.current = stream;
+
+      // Focus on the video element to enable scanning
+      if (videoRef.current && videoRef.current.focus) {
+        videoRef.current.focus();
+      }
     } catch (error) {
       console.error('Camera access error:', error);
     }
@@ -81,7 +91,15 @@ const BarcodeScanner = () => {
       <div className="scanner-container">
         <div className={`scan-line ${barcodeDetected ? 'scanning' : ''}`} />
         {/* Display the camera feed in a video element */}
-        <video ref={videoRef} playsInline autoPlay muted />
+        <video
+          ref={(el) => {
+            videoRef.current = el;
+          }}
+          playsInline
+          autoPlay
+          muted
+          focusable="true"
+        />
         <QrBarcodeScanner onScan={handleScan} />
       </div>
       <div className="result-container">

@@ -17,8 +17,19 @@ const BarcodeScanner = () => {
   };
 
   useEffect(() => {
-    // Request camera access when the component mounts
-    requestCameraAccess();
+    // Check for the device type (desktop or mobile)
+    const isMobileDevice =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      );
+
+    if (isMobileDevice) {
+      // Mobile device detected, request the back camera
+      requestCameraAccess({ facingMode: 'environment' });
+    } else {
+      // Desktop or non-mobile device, check for external scanner or ask for camera access
+      checkForExternalScanner();
+    }
 
     // Cleanup function to stop the camera stream when unmounting
     return () => {
@@ -41,11 +52,16 @@ const BarcodeScanner = () => {
     };
   }, [barcodeDetected]);
 
-  const requestCameraAccess = async () => {
+  const checkForExternalScanner = () => {
+    // TODO: Implement logic to check for external scanner here
+
+    // For demonstration purposes, assume no external scanner is detected
+    requestCameraAccess();
+  };
+
+  const requestCameraAccess = async (constraints = { video: true }) => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }, // Request the back camera
-      });
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
       setIsCameraAccessible(true);
 
       if (videoRef.current) {

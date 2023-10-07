@@ -5,10 +5,12 @@ const BarcodeScanner = () => {
   const [scannedData, setScannedData] = useState('');
   const [isCameraAccessible, setIsCameraAccessible] = useState(false);
   const [cameraStream, setCameraStream] = useState(null);
+  const [barcodeDetected, setBarcodeDetected] = useState(false);
 
   const handleScan = (data) => {
     if (data) {
       setScannedData(data);
+      setBarcodeDetected(true); // Barcode detected, show modal
     }
   };
 
@@ -16,6 +18,17 @@ const BarcodeScanner = () => {
     // Request camera access when the component mounts
     requestCameraAccess();
   }, []);
+
+  useEffect(() => {
+    // Reset barcode detection after 10 seconds
+    const resetBarcodeDetection = setTimeout(() => {
+      setBarcodeDetected(false);
+    }, 10000);
+
+    return () => {
+      clearTimeout(resetBarcodeDetection);
+    };
+  }, [barcodeDetected]);
 
   const requestCameraAccess = async () => {
     try {
@@ -50,12 +63,14 @@ const BarcodeScanner = () => {
         </div>
       )}
       <div className="result-container">
-        {scannedData && (
+        {barcodeDetected && (
           <div>
-            <p>Scanned Data:</p>
+            <p>Barcode Detected:</p>
             <pre>{scannedData}</pre>
+            {/* Display your modal here */}
           </div>
         )}
+        {!barcodeDetected && <p>No barcode found after 10 seconds.</p>}
       </div>
     </div>
   );

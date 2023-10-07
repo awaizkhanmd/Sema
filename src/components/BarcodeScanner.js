@@ -7,6 +7,7 @@ const BarcodeScanner = () => {
   const [isCameraAccessible, setIsCameraAccessible] = useState(false);
   const [barcodeDetected, setBarcodeDetected] = useState(false);
   const videoRef = useRef(null);
+  const streamRef = useRef(null); // Store the camera stream reference
 
   const handleScan = (data) => {
     if (data) {
@@ -18,6 +19,15 @@ const BarcodeScanner = () => {
   useEffect(() => {
     // Request camera access when the component mounts
     requestCameraAccess();
+
+    // Cleanup function to stop the camera stream when unmounting
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => {
+          track.stop();
+        });
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -33,13 +43,18 @@ const BarcodeScanner = () => {
 
   const requestCameraAccess = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' }, // Request the back camera
+      });
       setIsCameraAccessible(true);
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         videoRef.current.play();
       }
+
+      // Store the camera stream reference
+      streamRef.current = stream;
     } catch (error) {
       console.error('Camera access error:', error);
     }
